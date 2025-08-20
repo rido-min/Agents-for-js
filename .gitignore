@@ -7,3 +7,6 @@ test-report.xml
 tsconfig.tsbuildinfo
 devTools/
 generated
+coverage/
+.c8_output/
+.nyc_output/
