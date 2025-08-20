@@ -1,8 +1,89 @@
 import assert from 'assert'
 import { describe, it, beforeEach, afterEach } from 'node:test'
 import sinon from 'sinon'
-import { ConversationState, UserState } from '../../../src'
+import { ConversationState, UserState, AgentState } from '../../../src'
 import { Storage } from '@microsoft/agents-hosting'
+
+describe('AgentState', () => {
+  let mockStorage: Storage
+  let agentState: AgentState
+
+  beforeEach(() => {
+    // Create a simple mock storage
+    mockStorage = {
+      read: async () => ({}),
+      write: async () => {},
+      delete: async () => {}
+    }
+    
+    agentState = new AgentState(mockStorage)
+  })
+
+  it('should create AgentState with storage', () => {
+    assert(agentState)
+    assert.strictEqual(typeof agentState.getStorageKey, 'function')
+    assert.strictEqual(typeof agentState.load, 'function')
+    assert.strictEqual(typeof agentState.saveChanges, 'function')
+    assert.strictEqual(typeof agentState.delete, 'function')
+    assert.strictEqual(typeof agentState.createProperty, 'function')
+  })
+
+  it('should create property accessor', () => {
+    const propertyName = 'testProperty'
+    const property = agentState.createProperty(propertyName)
+
+    assert(property)
+    assert.strictEqual(typeof property.get, 'function')
+    assert.strictEqual(typeof property.set, 'function')
+    assert.strictEqual(typeof property.delete, 'function')
+  })
+
+  it('should create property accessor with default value', () => {
+    const propertyName = 'testProperty'
+    const defaultValue = { test: 'default' }
+    const property = agentState.createProperty(propertyName, defaultValue)
+
+    assert(property)
+    assert.strictEqual(typeof property.get, 'function')
+    assert.strictEqual(typeof property.set, 'function')
+    assert.strictEqual(typeof property.delete, 'function')
+  })
+
+  it('should generate storage key', () => {
+    const mockContext = {
+      activity: {
+        channelId: 'test-channel',
+        conversation: { id: 'test-conversation' }
+      }
+    }
+
+    const key = agentState.getStorageKey(mockContext as any)
+    
+    assert(key)
+    assert.strictEqual(typeof key, 'string')
+    assert(key.length > 0)
+  })
+
+  it('should handle multiple property accessors', () => {
+    const property1 = agentState.createProperty('property1')
+    const property2 = agentState.createProperty('property2')
+
+    assert(property1)
+    assert(property2)
+    assert.notStrictEqual(property1, property2)
+  })
+
+  it('should validate property names', () => {
+    // Test various property name formats
+    const validNames = ['test', 'testProperty', 'test_property', 'test123']
+    
+    validNames.forEach(name => {
+      assert.doesNotThrow(() => {
+        agentState.createProperty(name)
+      })
+    })
+  })
+})
 
 describe('ConversationState', () => {
   let sandbox: sinon.SinonSandbox
