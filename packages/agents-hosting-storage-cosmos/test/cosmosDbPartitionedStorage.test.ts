@@ -1,9 +1,9 @@
 import assert from 'assert'
 import { describe, it } from 'node:test'
+import { DoOnce } from '../src/cosmosDbPartitionedStorage'
 
 describe('DoOnce', () => {
   it('should execute function once for a given key', async () => {
-    const { DoOnce } = require('../src')
     const doOnce = new DoOnce<string>()
     
     let callCount = 0
@@ -21,7 +21,6 @@ describe('DoOnce', () => {
   })
 
   it('should execute function separately for different keys', async () => {
-    const { DoOnce } = require('../src')
     const doOnce = new DoOnce<string>()
     
     let callCount = 0
