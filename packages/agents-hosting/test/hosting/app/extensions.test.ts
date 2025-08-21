@@ -71,7 +71,7 @@ describe('AgentExtension', () => {
     const routeSelector = sinon.stub().returns(true)
     const routeHandler = sinon.stub()
     const isInvokeRoute = true
-    const rank = RouteRank.Highest
+    const rank = RouteRank.First
     
     extension.addRoute(mockApp as any, routeSelector, routeHandler, isInvokeRoute, rank)
     
@@ -81,7 +81,7 @@ describe('AgentExtension', () => {
     
     assert.strictEqual(handler, routeHandler)
     assert.strictEqual(invokeFlag, true)
-    assert.strictEqual(routeRank, RouteRank.Highest)
+    assert.strictEqual(routeRank, RouteRank.First)
   })
 
   it('should create route selector that matches channel and original selector', async () => {

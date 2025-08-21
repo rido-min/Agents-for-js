@@ -85,9 +85,9 @@ describe('RouteList', () => {
       const handler3 = sinon.stub()
       
       // Add routes with different ranks (out of order)
-      routeList.addRoute(selector1, handler1, false, RouteRank.Normal)
-      routeList.addRoute(selector2, handler2, false, RouteRank.Highest)
-      routeList.addRoute(selector3, handler3, false, RouteRank.Lowest)
+      routeList.addRoute(selector1, handler1, false, RouteRank.Unspecified)
+      routeList.addRoute(selector2, handler2, false, RouteRank.First)
+      routeList.addRoute(selector3, handler3, false, RouteRank.Last)
       
       const routes = Array.from(routeList)
       assert.strictEqual(routes.length, 3)
@@ -105,21 +105,21 @@ describe('RouteList', () => {
       const invokeHandler = sinon.stub()
       
       // Add regular route with highest rank
-      routeList.addRoute(regularSelector, regularHandler, false, RouteRank.Highest)
+      routeList.addRoute(regularSelector, regularHandler, false, RouteRank.First)
       
       // Add invoke route with lowest rank (should still come first)
-      routeList.addRoute(invokeSelector, invokeHandler, true, RouteRank.Lowest)
+      routeList.addRoute(invokeSelector, invokeHandler, true, RouteRank.Last)
       
       const routes = Array.from(routeList)
       assert.strictEqual(routes.length, 2)
       
       // Invoke route should be first despite having lower rank
       assert.strictEqual(routes[0].isInvokeRoute, true)
-      assert.strictEqual(routes[0].rank, RouteRank.Lowest)
+      assert.strictEqual(routes[0].rank, RouteRank.Last)
       
       // Regular route should be second despite having higher rank
       assert.strictEqual(routes[1].isInvokeRoute, false)
-      assert.strictEqual(routes[1].rank, RouteRank.Highest)
+      assert.strictEqual(routes[1].rank, RouteRank.First)
     })
 
     it('should sort invoke routes by rank among themselves', () => {
@@ -129,15 +129,15 @@ describe('RouteList', () => {
       const handler2 = sinon.stub()
       
       // Add two invoke routes with different ranks
-      routeList.addRoute(selector1, handler1, true, RouteRank.Normal)
-      routeList.addRoute(selector2, handler2, true, RouteRank.Highest)
+      routeList.addRoute(selector1, handler1, true, RouteRank.Unspecified)
+      routeList.addRoute(selector2, handler2, true, RouteRank.First)
       
       const routes = Array.from(routeList)
       assert.strictEqual(routes.length, 2)
       
       // Both are invoke routes, so rank determines order
-      assert.strictEqual(routes[0].rank, RouteRank.Highest)
-      assert.strictEqual(routes[1].rank, RouteRank.Normal)
+      assert.strictEqual(routes[0].rank, RouteRank.First)
+      assert.strictEqual(routes[1].rank, RouteRank.Unspecified)
     })
 
     it('should handle undefined rank as 0 in sorting', () => {
@@ -146,16 +146,15 @@ describe('RouteList', () => {
       const selector2 = sinon.stub()
       const handler2 = sinon.stub()
       
-      routeList.addRoute(selector1, handler1, false, RouteRank.Normal) // 0
+      routeList.addRoute(selector1, handler1, false, RouteRank.Unspecified) // MAX_VALUE/2
       routeList.addRoute(selector2, handler2, false, undefined as any) // Should be treated as 0
       
       const routes = Array.from(routeList)
       assert.strictEqual(routes.length, 2)
       
-      // Both should have effective rank of 0, so order depends on insertion order
-      // But both should be treated equally in sorting
-      assert.strictEqual(routes[0].rank, RouteRank.Normal)
-      assert.strictEqual(routes[1].rank, undefined)
+      // Both should have effective rank of MAX_VALUE/2 and 0, so 0 should come first
+      assert.strictEqual(routes[0].rank, undefined)
+      assert.strictEqual(routes[1].rank, RouteRank.Unspecified)
     })
 
     it('should allow method chaining', () => {
